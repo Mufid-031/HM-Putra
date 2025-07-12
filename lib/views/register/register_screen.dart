@@ -1,16 +1,16 @@
 import 'package:first_app_flutter/routes/app_routes.dart';
-import 'package:first_app_flutter/views/login/login_view_model.dart';
+import 'package:first_app_flutter/views/register/register_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-class LoginShadcnScreen extends StatelessWidget {
-  const LoginShadcnScreen({super.key});
+class RegisterScreen extends StatelessWidget {
+  const RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = ShadTheme.of(context);
-    final loginViewModel = Provider.of<LoginViewModel>(context);
+    final registerViewModel = Provider.of<RegisterViewModel>(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
@@ -27,7 +27,7 @@ class LoginShadcnScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Login',
+                    'Register',
                     style: TextStyle(
                       fontSize: theme.textTheme.h1Large.fontSize,
                       fontWeight: theme.textTheme.h3.fontWeight,
@@ -35,7 +35,7 @@ class LoginShadcnScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Please enter your email and password to login.',
+                    'Please fill email and password to Register.',
                     style: TextStyle(
                       fontSize: theme.textTheme.p.fontSize,
                       color: theme.colorScheme.mutedForeground,
@@ -69,29 +69,39 @@ class LoginShadcnScreen extends StatelessWidget {
                               ShadInputFormField(
                                 label: const Text("Email"),
                                 placeholder: const Text("Enter your email"),
-                                initialValue: loginViewModel.email,
+                                initialValue: registerViewModel.email,
                                 onChanged: (value) =>
-                                    loginViewModel.setEmail(value),
+                                    registerViewModel.setEmail(value),
                               ),
                               const SizedBox(height: 16),
                               ShadInputFormField(
                                 label: const Text("Password"),
                                 placeholder: const Text("Enter your password"),
                                 obscureText: true,
-                                initialValue: loginViewModel.password,
+                                initialValue: registerViewModel.password,
                                 onChanged: (value) =>
-                                    loginViewModel.setPassword(value),
+                                    registerViewModel.setPassword(value),
                               ),
                               const SizedBox(height: 16),
                               ShadButton(
                                 width: double.infinity,
                                 onPressed: () async {
-                                  final success = await loginViewModel.login();
+                                  final success = await registerViewModel
+                                      .registerWithEmailAndPassword();
 
                                   if (success && context.mounted) {
+                                    ShadToaster.of(context).show(
+                                      const ShadToast(
+                                        title: Text('Register Success'),
+                                        description: Text(
+                                          'Please login with your email and password',
+                                        ),
+                                      ),
+                                    );
+
                                     Navigator.pushReplacementNamed(
                                       context,
-                                      AppRoutes.home,
+                                      AppRoutes.login,
                                     );
                                   } else {
                                     if (context.mounted) {
@@ -99,7 +109,7 @@ class LoginShadcnScreen extends StatelessWidget {
                                         ShadToast.destructive(
                                           title: const Text('Register Failed'),
                                           description: Text(
-                                            loginViewModel.errorMessage ??
+                                            registerViewModel.errorMessage ??
                                                 'Something went wrong',
                                           ),
                                         ),
@@ -107,7 +117,7 @@ class LoginShadcnScreen extends StatelessWidget {
                                     }
                                   }
                                 },
-                                child: const Text('Login'),
+                                child: const Text('Register'),
                               ),
                             ],
                           ),
@@ -143,16 +153,16 @@ class LoginShadcnScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        const Text('Don\'t have an account?'),
+                        const Text('Have an account? '),
                         ShadButton.link(
                           padding: const EdgeInsets.all(0),
                           child: const Text(
-                            'Sign up',
+                            'Sign in',
                           ),
                           onPressed: () {
                             Navigator.pushReplacementNamed(
                               context,
-                              AppRoutes.register,
+                              AppRoutes.login,
                             );
                           },
                         ),

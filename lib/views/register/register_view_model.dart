@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class LoginViewModel with ChangeNotifier {
+class RegisterViewModel extends ChangeNotifier {
   String email = '';
   String password = '';
 
@@ -18,23 +18,23 @@ class LoginViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> login() async {
+  Future<bool> registerWithEmailAndPassword() async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      
+
       return true;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        errorMessage = 'No user found for that email.';
-      } else if (e.code == 'wrong-password') {
-        errorMessage = 'Wrong password provided for that user.';
+      if (e.code == 'week-password') {
+        errorMessage = 'The password provided is too weak.';
+      } else if (e.code == 'email-already-in-use') {
+        errorMessage = 'The account already exists for that email.';
       }
 
       isLoading = false;

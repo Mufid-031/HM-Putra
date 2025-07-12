@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "307087474070",
+    "project_id": "hm-putra",
+    "storage_bucket": "hm-putra.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307087474070:android:6bb1a9bd16d2aeeb24f1b7",
+        "android_client_info": {
+          "package_name": "com.example.first_app_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpI_QlbMf-Nt0QVAvX2bzpj9Q-bvf2rVc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
