@@ -18,6 +18,13 @@ class RegisterViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void reset() {
+    email = '';
+    password = '';
+    errorMessage = null;
+    notifyListeners();
+  }
+
   Future<bool> registerWithEmailAndPassword() async {
     isLoading = true;
     errorMessage = null;

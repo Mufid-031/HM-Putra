@@ -1,13 +1,17 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
+// buildscript {
+//     // ext.kotlin_version = '2.2.0'
 
-    dependencies {
-        classpath 'com.google.gms:google-services:4.4.0' // 🔁 Ganti versinya ke yang sama
-    }
-}
+//     repositories {
+//         google()
+//         mavenCentral()
+//     }
+
+//     dependencies {
+//         // classpath "com.android.tools.build:gradle:8.4.0" // sesuaikan dengan versi Android Gradle Plugin terbaru
+//         // classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.0" // ✅ tambahkan ini kalau belum ada
+//         classpath "com.google.gms:google-services:4.4.0"
+//     }
+// }
 
 allprojects {
     repositories {

@@ -40,12 +40,14 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+
+    dependencies {
+        implementation platform('com.google.firebase:firebase-bom:33.16.0')
+    // implementation 'com.google.firebase:firebase-analytics'
+    }
 }
 
 flutter {
     source = "../.."
 }
 
-dependencies {
-    implementation platform('com.google.firebase:firebase-bom:33.16.0')
-}

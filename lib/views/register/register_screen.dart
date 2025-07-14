@@ -98,7 +98,7 @@ class RegisterScreen extends StatelessWidget {
                                         ),
                                       ),
                                     );
-
+                                    registerViewModel.reset();
                                     Navigator.pushReplacementNamed(
                                       context,
                                       AppRoutes.login,
@@ -125,31 +125,6 @@ class RegisterScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    // Stack(
-                    //   alignment: Alignment.center,
-                    //   children: <Widget>[
-                    //     const Positioned(
-                    //       child: Divider(),
-                    //     ),
-                    //     ShadBadge(
-                    //       padding: const EdgeInsets.all(5),
-                    //       child: Text(
-                    //         "Or",
-                    //         style: TextStyle(
-                    //           color: theme.colorScheme.accent,
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
-                    // Padding(
-                    //   padding: const EdgeInsets.all(20),
-                    //   child: ShadButton(
-                    //     width: double.infinity,
-                    //     onPressed: () {},
-                    //     child: const Text('Google'),
-                    //   ),
-                    // ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[

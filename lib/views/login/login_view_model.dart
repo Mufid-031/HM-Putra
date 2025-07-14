@@ -18,6 +18,13 @@ class LoginViewModel with ChangeNotifier {
     notifyListeners();
   }
 
+  void reset() {
+    email = '';
+    password = '';
+    errorMessage = null;
+    notifyListeners();
+  }
+
   Future<bool> login() async {
     isLoading = true;
     errorMessage = null;
@@ -28,7 +35,7 @@ class LoginViewModel with ChangeNotifier {
         email: email,
         password: password,
       );
-      
+
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -41,5 +48,9 @@ class LoginViewModel with ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  Future<void> loginAnonymous() async {
+    await FirebaseAuth.instance.signInAnonymously();
   }
 }

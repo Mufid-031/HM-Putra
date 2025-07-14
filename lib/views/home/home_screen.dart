@@ -1,238 +1,237 @@
-import 'package:first_app_flutter/constants/colors.dart';
-import 'package:first_app_flutter/views/home/home_view_model.dart';
+import 'package:first_app_flutter/services/item_service.dart';
+import 'package:first_app_flutter/views/home/kasir_content.dart';
+import 'package:first_app_flutter/views/home/profile_content.dart';
+import 'package:first_app_flutter/views/home/riwayat_content.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final List<String> tabs = ["Kasir", "Tambah Item", "Riwayat"];
-    final homeViewModel = Provider.of<HomeViewModel>(context);
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
-    return DefaultTabController(
-      length: tabs.length,
-      child: Scaffold(
-        backgroundColor: AppColors.white,
-        appBar: AppBar(
-          title: const Text(
-            "First App Flutter",
-            style: TextStyle(color: AppColors.primary),
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
+
+  @override
+  void dispose() {
+    _speech.stop();
+    super.dispose();
+  }
+
+  void _listenName(ItemService itemService) async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) {
+          if (val == "done" || val == "notListening") {
+            setState(() => _isListening = false);
+          }
+        },
+        onError: (val) => debugPrint('onError: $val'),
+      );
+
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          localeId: 'id_ID',
+          onResult: (val) {
+            itemService.setName(val.recognizedWords);
+          },
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = ShadTheme.of(context);
+    final itemService = Provider.of<ItemService>(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: theme.colorScheme.accentForeground,
+        title: Text(
+          'HM Putra',
+          style: TextStyle(
+            fontSize: theme.textTheme.h3.fontSize,
+            fontWeight: theme.textTheme.h3.fontWeight,
+            color: theme.colorScheme.accent,
           ),
-          backgroundColor: AppColors.background,
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(50),
-            child: TabBar(
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.textGrey,
-              indicatorColor: AppColors.primary,
-              tabs: tabs.map((tab) => Tab(text: tab)).toList(),
+        ),
+        actions: const <Widget>[
+          Padding(
+            padding: EdgeInsets.only(right: 10),
+            child: ShadAvatar(
+              'https://app.requestly.io/delay/2000/avatars.githubusercontent.com/u/124599?v=4',
+              placeholder: Text('HM'),
             ),
-          ),
-          actions: const <Widget>[
-            CircleAvatar(
-              backgroundColor: AppColors.primary,
-              child: Icon(
-                Icons.person,
-              ),
-            )
-          ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(10),
-          child: TabBarView(
-            children: [
-              ListView.builder(
-                itemCount: homeViewModel.items.length,
-                itemBuilder: (context, index) {
-                  final item = homeViewModel.items[index];
-                  return Card(
-                    child: ListTile(
-                      title: Text(item.name),
-                      subtitle: Text(
-                          "Berat: ${item.weight} kg, Harga: Rp ${item.price}"),
-                      trailing: PopupMenuOption(
-                        index: index,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              ListView(
-                children: <Widget>[
-                  Container(
-                    width: double.infinity,
-                    height: 80,
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: AppColors.background),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Text(
-                          "Nama Item",
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 20,
-                          ),
-                        ),
-                        TextField(
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: "Masukkan nama item",
-                            hintStyle: TextStyle(color: AppColors.white),
-                          ),
-                          onChanged: (value) => homeViewModel.setName(value),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    height: 80,
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: AppColors.background),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Text(
-                          "Berat Item",
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 20,
-                          ),
-                        ),
-                        TextField(
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: "Masukkan berat item",
-                            hintStyle: TextStyle(color: AppColors.white),
-                          ),
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) =>
-                              homeViewModel.setWeight(int.parse(value)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    height: 80,
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: AppColors.background),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Text(
-                          "Harga Item",
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 20,
-                          ),
-                        ),
-                        TextField(
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: "Masukkan harga item",
-                            hintStyle: TextStyle(color: AppColors.white),
-                          ),
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) =>
-                              homeViewModel.setPrice(int.parse(value)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  MaterialButton(
-                    onPressed: () async {
-                      await homeViewModel.save();
-                    },
-                    child: const Text("Simpan"),
-                  )
-                ],
-              ),
-              const Center(
-                child: Text("Tab 3"),
-              )
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          backgroundColor: AppColors.primary,
-          child: const Icon(
-            Icons.shopping_cart,
-            color: AppColors.white,
-          ),
-        ),
+          )
+        ],
       ),
+      body: HomeContent(selectedIndex: _selectedIndex),
+      bottomNavigationBar: SalomonBottomBar(
+        currentIndex: _selectedIndex,
+        selectedItemColor: const Color(0xff6200ee),
+        unselectedItemColor: const Color(0xff757575),
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        items: _navBarItems,
+      ),
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton(
+              onPressed: () {
+                showShadDialog(
+                  context: context,
+                  builder: (context) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: ShadDialog(
+                      title: const Text('Tambah Barang'),
+                      description:
+                          const Text("Tambahkan barang baru ke kasir HM Putra"),
+                      actions: [
+                        ShadButton(
+                          onPressed: () async {
+                            await itemService.save();
+                            // ignore: use_build_context_synchronously
+                            Navigator.of(context).pop();
+                            itemService.reset();
+                          },
+                          child: const Text('Tambah'),
+                        ),
+                      ],
+                      child: Container(
+                        width: 375,
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: <Widget>[
+                            ShadInputFormField(
+                              label: const Text('Name'),
+                              placeholder: const Text('Masukkan nama barang'),
+                              controller: itemService.textEditingController,
+                              onChanged: (value) => itemService.setName(value),
+                              suffix: IconButton(
+                                onPressed: () => _listenName(itemService),
+                                icon: Icon(
+                                  _isListening ? Icons.mic_off : Icons.mic,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            ShadInputFormField(
+                              label: const Text('Weight'),
+                              placeholder: const Text('Masukkan berat barang'),
+                              keyboardType: TextInputType.number,
+                              initialValue: itemService.weight.toString(),
+                              onChanged: (value) =>
+                                  itemService.setWeight(double.parse(value)),
+                            ),
+                            const SizedBox(height: 20),
+                            ShadInputFormField(
+                              label: const Text('Price'),
+                              placeholder: const Text('Masukkan harga barang'),
+                              keyboardType: TextInputType.number,
+                              initialValue: itemService.price.toString(),
+                              onChanged: (value) =>
+                                  itemService.setPrice(int.parse(value)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 }
 
-class PopupMenuOption extends StatefulWidget {
-  final int index;
+final _navBarItems = [
+  SalomonBottomBarItem(
+    icon: const Icon(LucideIcons.shoppingCart),
+    title: const Text("Kasir"),
+    selectedColor: Colors.purple,
+  ),
+  SalomonBottomBarItem(
+    icon: const Icon(Icons.inventory),
+    title: const Text("Barang"),
+    selectedColor: Colors.pink,
+  ),
+  SalomonBottomBarItem(
+    icon: const Icon(LucideIcons.history),
+    title: const Text("Riwayat"),
+    selectedColor: Colors.orange,
+  ),
+  SalomonBottomBarItem(
+    icon: const Icon(Icons.person),
+    title: const Text("Profile"),
+    selectedColor: Colors.teal,
+  ),
+];
 
-  const PopupMenuOption({super.key, required this.index});
+class HomeContent extends StatelessWidget {
+  int selectedIndex;
 
-  @override
-  State<PopupMenuOption> createState() => _PopupMenuOptionState();
-}
-
-enum ItemOption { edit, delete }
-
-class _PopupMenuOptionState extends State<PopupMenuOption> {
-  ItemOption? selectedItem;
+  HomeContent({
+    super.key,
+    required this.selectedIndex,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final homeViewModel = Provider.of<HomeViewModel>(context);
+    Widget content;
 
-    return PopupMenuButton<ItemOption>(
-      initialValue: selectedItem,
-      onSelected: (ItemOption item) {
-        setState(() {
-          selectedItem = item;
-        });
+    switch (selectedIndex) {
+      case 0:
+        content = const KasirContent();
+        break;
 
-        if (item == ItemOption.delete) {
-          homeViewModel.delete(widget.index);
-        }
-      },
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<ItemOption>>[
-        const PopupMenuItem<ItemOption>(
-          value: ItemOption.edit,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Icon(Icons.edit),
-              Text("Edit"),
-            ],
-          ),
-        ),
-        const PopupMenuItem<ItemOption>(
-          value: ItemOption.delete,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Icon(Icons.delete),
-              Text("Delete"),
-            ],
-          ),
-        ),
-      ],
+      case 1:
+        content = const Center(child: Text('Belum ada barang'));
+        break;
+
+      case 2:
+        content = const RiwayatContent();
+        break;
+
+      case 3:
+        content = const ProfileContent();
+        break;
+
+      default:
+        content = Center(child: _navBarItems[selectedIndex].title);
+    }
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        maxWidth: double.infinity,
+        maxHeight: double.infinity,
+      ),
+      child: content,
     );
   }
 }

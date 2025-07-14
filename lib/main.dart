@@ -1,10 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:first_app_flutter/routes/app_routes.dart';
-// import 'package:first_app_flutter/views/home/home_screen.dart';
-import 'package:first_app_flutter/views/home/home_shadcn_screen.dart';
-import 'package:first_app_flutter/views/home/home_view_model.dart';
-// import 'package:first_app_flutter/views/login/login_screen.dart';
-import 'package:first_app_flutter/views/login/login_shadcn_screen.dart';
+import 'package:first_app_flutter/services/item_service.dart';
+import 'package:first_app_flutter/services/transaction_service.dart';
+import 'package:first_app_flutter/views/home/home_screen.dart';
+import 'package:first_app_flutter/views/login/login_screen.dart';
 import 'package:first_app_flutter/views/login/login_view_model.dart';
 import 'package:first_app_flutter/views/register/register_screen.dart';
 import 'package:first_app_flutter/views/register/register_view_model.dart';
@@ -23,7 +22,8 @@ void main() async {
   );
 
   if (isDevMode) {
-    await FirebaseAuth.instance.useAuthEmulator('10.0.2.2', 9099);
+    // FirebaseFirestore.instance.useFirestoreEmulator('10.0.2.2', 8080);
+    // await FirebaseAuth.instance.useAuthEmulator('10.0.2.2', 9099);
   }
 
   runApp(
@@ -31,12 +31,12 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => RegisterViewModel()),
-        ChangeNotifierProvider(create: (_) => HomeViewModel()),
+        ChangeNotifierProvider(create: (_) => ItemService()),
+        ChangeNotifierProvider(create: (_) => TransactionService()),
       ],
       child: const MyApp(),
     ),
   );
-
 }
 
 class MyApp extends StatelessWidget {
@@ -44,22 +44,36 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ShadApp(
-      debugShowCheckedModeBanner: false,
-      theme: ShadThemeData(
-        brightness: Brightness.light,
-        colorScheme: const ShadNeutralColorScheme.light(),
-      ),
-      // darkTheme: ShadThemeData(
-      //   brightness: Brightness.dark,
-      //   colorScheme: const ShadNeutralColorScheme.dark(),
-      // ),
-      initialRoute: AppRoutes.login,
-      themeMode: ThemeMode.light,
-      routes: {
-        AppRoutes.login: (context) => const LoginShadcnScreen(),
-        AppRoutes.register: (context) => const RegisterScreen(),
-        AppRoutes.home: (context) => const HomeShadcnScreen(),
+    return StreamBuilder<User?>(
+      stream:
+          FirebaseAuth.instance.authStateChanges(), // Dengarkan status login
+      builder: (context, snapshot) {
+        // Sementara loading
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const MaterialApp(
+            home: Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+
+        // Jika user sudah login, arahkan ke Home
+        final bool isLoggedIn = snapshot.hasData;
+
+        return ShadApp(
+          debugShowCheckedModeBanner: false,
+          theme: ShadThemeData(
+            brightness: Brightness.light,
+            colorScheme: const ShadNeutralColorScheme.light(),
+          ),
+          themeMode: ThemeMode.light,
+          initialRoute: isLoggedIn ? AppRoutes.home : AppRoutes.login,
+          routes: {
+            AppRoutes.login: (context) => const LoginScreen(),
+            AppRoutes.register: (context) => const RegisterScreen(),
+            AppRoutes.home: (context) => const HomeScreen(),
+          },
+        );
       },
     );
   }
